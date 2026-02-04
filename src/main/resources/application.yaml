@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: demo
+  datasource:
+    username: postgres
+    password: supino2604
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/autoflex
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 8081
