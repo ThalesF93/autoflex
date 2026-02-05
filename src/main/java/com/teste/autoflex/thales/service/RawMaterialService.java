@@ -6,11 +6,12 @@ import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -46,5 +47,19 @@ public class RawMaterialService {
        material.setStockQuantity(newQuantity);
 
        return repository.save(material);
+    }
+
+    public List<RawMaterial>  search(String name){
+        RawMaterial entity = new  RawMaterial();
+        entity.setName(name);
+
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Example<RawMaterial> materials = Example.of(entity, matcher);
+        return repository.findAll(materials);
     }
 }

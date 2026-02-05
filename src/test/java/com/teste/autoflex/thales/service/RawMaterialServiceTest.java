@@ -12,10 +12,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Example;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +45,7 @@ class RawMaterialServiceTest {
         service.save(dto);
 
         Mockito.verify(repository).save(entity);
-        Assertions.assertThat(dto.stockQuantity()).isEqualTo(entity.getStockQuantity());
+        assertThat(dto.stockQuantity()).isEqualTo(entity.getStockQuantity());
 
     }
 
@@ -85,6 +88,42 @@ class RawMaterialServiceTest {
 
         verify(repository).save(any(RawMaterial.class));
         verify(repository).findByName(any(String.class));
+    }
+
+    @Test
+    @DisplayName("Must Throw Customized Exception when name not found ")
+    void mustThrowExceptionWhenNameNotFound(){
+        String name = "test";
+
+        Assertions.assertThatExceptionOfType(MaterialNotFoundException.class)
+                .isThrownBy(()->service.update(name, anyDouble())).withMessage("Material not found");
+    }
+
+    @Test
+    @DisplayName("Must get and show products")
+    void mustGetMaterials(){
+        String searchName = "example";
+    
+        RawMaterial material1 = new RawMaterial();
+        material1.setId(UUID.randomUUID());
+        material1.setName("example material 1");
+        material1.setStockQuantity(100D);
+    
+        RawMaterial material2 = new RawMaterial();
+        material2.setId(UUID.randomUUID());
+        material2.setName("example material 2");
+        material2.setStockQuantity(200D);
+    
+        List<RawMaterial> expectedMaterials = List.of(material1, material2);
+    
+        when(repository.findAll(any(Example.class))).thenReturn(expectedMaterials);
+
+        List<RawMaterial> result = service.search(searchName);
+
+        verify(repository).findAll(any(Example.class));
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyInAnyOrder(material1, material2);
     }
 
 }
