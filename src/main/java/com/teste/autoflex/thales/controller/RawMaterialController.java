@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @Data
@@ -40,5 +42,16 @@ public class RawMaterialController {
     public ResponseEntity<RawMaterial> update(@RequestParam String name, Double quantity){
       RawMaterial rawMaterial =  service.update(name, quantity);
         return ResponseEntity.ok(rawMaterial);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<RawMaterialDTO>> search(@RequestParam String name){
+        List<RawMaterial> list = service.search(name);
+        List<RawMaterialDTO> listDTO = list
+                .stream()
+                .map(obj -> new RawMaterialDTO(obj.getId(), obj.getName(), obj.getStockQuantity()))
+                .toList();
+
+        return ResponseEntity.ok(listDTO);
     }
 }

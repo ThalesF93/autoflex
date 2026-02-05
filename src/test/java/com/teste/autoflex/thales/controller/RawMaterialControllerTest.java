@@ -1,24 +1,24 @@
 package com.teste.autoflex.thales.controller;
 
-import com.jayway.jsonpath.JsonPath;
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import com.teste.autoflex.thales.service.RawMaterialService;
-import org.apache.catalina.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.Example;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,9 +93,7 @@ class RawMaterialControllerTest {
 
         RawMaterial entity = new RawMaterial(UUID.randomUUID(), "algodao", 41984D);
 
-        Mockito.when(repository.findByName(entity.getName())).thenReturn(entity);
         Mockito.when(service.update(entity.getName(), entity.getStockQuantity())).thenReturn(entity);
-        Mockito.when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(entity);
 
         mvc.perform(MockMvcRequestBuilders
                         .put(PUT_ENDPOINT)
@@ -107,6 +105,27 @@ class RawMaterialControllerTest {
                 .update(entity.getName(), entity.getStockQuantity());
 
 
+    }
+
+    @Test
+    @DisplayName("Must obtain the raw product")
+    void shouldSearchProduct() throws Exception{
+        final String GET_ENDPOINT = "/material/search";
+
+        RawMaterialDTO dto = new RawMaterialDTO(UUID.randomUUID(), "algodao", 41984D);
+        RawMaterial material = new RawMaterial(dto.id(), dto.name(), dto.stockQuantity());
+        Mockito.when(service.search(dto.name())).thenReturn((List.of(material)));
+
+
+        mvc.perform(MockMvcRequestBuilders
+                        .get(GET_ENDPOINT)
+                        .param("name", dto.name()))
+                .andExpect(jsonPath("$[0].name").value(dto.name()))
+                .andExpect(jsonPath("$[0].stockQuantity").value(dto.stockQuantity()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(service)
+                .search(dto.name());
     }
 
 }
