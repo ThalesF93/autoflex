@@ -1,5 +1,6 @@
 package com.teste.autoflex.thales.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
@@ -40,7 +41,7 @@ class RawMaterialControllerTest {
 
 
     @Test
-    @DisplayName("Must Create a product into database")
+    @DisplayName("Must Create a material into database")
     void shouldCreateRawProduct() throws Exception{
 
         final String POST_ENDPOINT = "/material/create";
@@ -65,5 +66,47 @@ class RawMaterialControllerTest {
         Mockito.verify(service)
                 .save(Mockito.any(RawMaterialDTO.class));
     }
-    as
- }
+
+    @Test
+    @DisplayName("Must delete material")
+    void shouldDeleteProduct() throws Exception {
+
+        final String DELETE_ENDPOINT = "/material/{id}";
+
+        UUID uuid = UUID.randomUUID();
+
+        Mockito.doNothing().when(service).delete(uuid);
+
+        mvc.perform(MockMvcRequestBuilders
+                        .delete(DELETE_ENDPOINT, uuid))
+                .andExpect(status().isOk());
+
+        Mockito.verify(service).delete(uuid);
+
+    }
+
+    @Test
+    @DisplayName("Must update product quantity")
+    void shouldUpdateProduct() throws Exception{
+
+        final String PUT_ENDPOINT = "/material/update";
+
+        RawMaterial entity = new RawMaterial(UUID.randomUUID(), "algodao", 41984D);
+
+        Mockito.when(repository.findByName(entity.getName())).thenReturn(entity);
+        Mockito.when(service.update(entity.getName(), entity.getStockQuantity())).thenReturn(entity);
+        Mockito.when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(entity);
+
+        mvc.perform(MockMvcRequestBuilders
+                        .put(PUT_ENDPOINT)
+                        .param("name", entity.getName())
+                        .param( "quantity", entity.getStockQuantity().toString())
+                )
+                .andExpect(status().isOk());
+        Mockito.verify(service)
+                .update(entity.getName(), entity.getStockQuantity());
+
+
+    }
+
+}

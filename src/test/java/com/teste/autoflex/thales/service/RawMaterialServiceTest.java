@@ -1,6 +1,7 @@
 package com.teste.autoflex.thales.service;
 
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
+import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import org.assertj.core.api.Assertions;
@@ -12,7 +13,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Optional;
 import java.util.UUID;
+
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class RawMaterialServiceTest {
@@ -33,14 +37,54 @@ class RawMaterialServiceTest {
         entity.setName(dto.name());
         entity.setStockQuantity(dto.stockQuantity());
 
-        Mockito.when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(entity);
+        when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(entity);
 
         service.save(dto);
 
         Mockito.verify(repository).save(entity);
         Assertions.assertThat(dto.stockQuantity()).isEqualTo(entity.getStockQuantity());
 
+    }
 
+    @Test
+    @DisplayName("Must delete a product by ID")
+    void mustDeleteById(){
+
+        RawMaterial material = new RawMaterial();
+        material.setId(UUID.randomUUID());
+
+        when(repository.findById(material.getId())).thenReturn(Optional.of(material));
+        doNothing().when(repository).delete(material);
+
+        service.delete(material.getId());
+        verify(repository).delete(material);
+    }
+
+    @Test
+    @DisplayName("Must Throw Customized Exception when ID not found ")
+    void mustThrowException(){
+        UUID uuid = UUID.randomUUID();
+        when(repository.findById(uuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(MaterialNotFoundException.class)
+                .isThrownBy(()->service.delete(uuid)).withMessage("Material not found");
+    }
+
+    @Test
+    @DisplayName("Must update the product quantity")
+    void mustUpdateQuantity(){
+
+        RawMaterial rawMaterial = new RawMaterial();
+        rawMaterial.setName("test");
+        rawMaterial.setStockQuantity(100D);
+
+        when(repository.findByName(rawMaterial.getName())).thenReturn(rawMaterial);
+        when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(rawMaterial);
+
+        service.update(rawMaterial.getName(), rawMaterial.getStockQuantity());
+
+        verify(repository).save(any(RawMaterial.class));
+        verify(repository).findByName(any(String.class));
     }
 
 }
