@@ -11,8 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.Mockito;
-import org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
@@ -70,6 +68,23 @@ class RawMaterialServiceTest {
 
         Assertions.assertThatExceptionOfType(MaterialNotFoundException.class)
                 .isThrownBy(()->service.delete(uuid)).withMessage("Material not found");
+    }
+
+    @Test
+    @DisplayName("Must update the product quantity")
+    void mustUpdateQuantity(){
+
+        RawMaterial rawMaterial = new RawMaterial();
+        rawMaterial.setName("test");
+        rawMaterial.setStockQuantity(100D);
+
+        when(repository.findByName(rawMaterial.getName())).thenReturn(rawMaterial);
+        when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(rawMaterial);
+
+        service.update(rawMaterial.getName(), rawMaterial.getStockQuantity());
+
+        verify(repository).save(any(RawMaterial.class));
+        verify(repository).findByName(any(String.class));
     }
 
 }
