@@ -35,4 +35,10 @@ public class RawMaterialController {
             service.delete(id);
             return ResponseEntity.ok("Material deleted Successfully!");
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<RawMaterial> update(@RequestParam String name, Double quantity){
+      RawMaterial rawMaterial =  service.update(name, quantity);
+        return ResponseEntity.ok(rawMaterial);
+    }
 }

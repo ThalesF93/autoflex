@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RawMaterialRepository extends JpaRepository<RawMaterial, UUID> {
-    List<RawMaterial> id(UUID id);
+
+   RawMaterial findByName(String name);
+
 
 }
