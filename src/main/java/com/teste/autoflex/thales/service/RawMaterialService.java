@@ -1,6 +1,7 @@
 package com.teste.autoflex.thales.service;
 
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
+import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
@@ -22,13 +23,14 @@ public class RawMaterialService {
     private RawMaterialRepository repository;
 
     @Transactional
-    public RawMaterial save(RawMaterialDTO dto){
+    public RawMaterialResponseDTO save(RawMaterialDTO dto){
         RawMaterial entity = new RawMaterial();
         entity.setName(dto.name());
         entity.setStockQuantity(dto.stockQuantity());
         entity.setId(dto.id());
         repository.save(entity);
-        return entity;
+
+        return new RawMaterialResponseDTO(entity.getName(), entity.getStockQuantity());
     }
 
     @Transactional
