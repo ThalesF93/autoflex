@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,5 +32,11 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable UUID id){
             service.delete(id);
             return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> findAll(){
+        var products = service.listAll();
+        return ResponseEntity.ok(products);
     }
 }
