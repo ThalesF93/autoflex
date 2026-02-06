@@ -71,6 +71,8 @@ class RawMaterialServiceTest {
 
         Assertions.assertThatExceptionOfType(MaterialNotFoundException.class)
                 .isThrownBy(()->service.delete(uuid)).withMessage("Material not found");
+
+        verify(repository, never()).delete(any(RawMaterial.class));
     }
 
     @Test
