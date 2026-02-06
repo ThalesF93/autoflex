@@ -1,5 +1,7 @@
 package com.teste.autoflex.thales.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,7 +17,7 @@ public class ProductComposition {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JsonManagedReference
     private Product product;
 
     @ManyToOne
