@@ -1,6 +1,5 @@
 package com.teste.autoflex.thales.dto;
 
-import com.teste.autoflex.thales.model.ProductComposition;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -21,5 +20,5 @@ public record ProductDTO(
         @Positive
         BigDecimal price,
 
-        List<ProductComposition> compositions ) {
+        List<IngredientDTO> ingredients) {
 }

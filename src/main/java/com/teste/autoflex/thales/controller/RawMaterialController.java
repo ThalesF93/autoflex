@@ -21,9 +21,6 @@ import java.util.stream.Collectors;
 public class RawMaterialController {
 
     @Autowired
-    private RawMaterialRepository repository;
-
-    @Autowired
     private RawMaterialService service;
 
     @PostMapping("/create")
