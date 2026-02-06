@@ -1,6 +1,7 @@
 package com.teste.autoflex.thales.controller;
 
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
+import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import com.teste.autoflex.thales.service.RawMaterialService;
@@ -51,8 +52,9 @@ class RawMaterialControllerTest {
         entity.setId(dto.id());
         entity.setName(dto.name());
         entity.setStockQuantity(dto.stockQuantity());
+        RawMaterialResponseDTO responseDTO = new RawMaterialResponseDTO(entity.getName(), entity.getStockQuantity());
 
-        Mockito.when(service.save(dto)).thenReturn(entity);
+        Mockito.when(service.save(dto)).thenReturn(responseDTO);
 
         mvc.perform(MockMvcRequestBuilders
                         .post(POST_ENDPOINT)
@@ -60,11 +62,10 @@ class RawMaterialControllerTest {
                         .accept(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(dto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(entity.getId().toString()))
                 .andExpect(jsonPath("$.name").value(dto.name()))
-                .andExpect(jsonPath("$.stockQuantity").value(dto.stockQuantity()));
+                .andExpect(jsonPath("$.stockQuantity").value(entity.getStockQuantity()));
         Mockito.verify(service)
-                .save(Mockito.any(RawMaterialDTO.class));
+                .save(any(RawMaterialDTO.class));
     }
 
     @Test

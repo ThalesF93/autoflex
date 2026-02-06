@@ -9,10 +9,9 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @Data
@@ -22,10 +21,15 @@ public class ProductController {
     @Autowired
     private ProductService service;
 
-    @PostMapping("/save")
+    @PostMapping("/create")
     public ResponseEntity<ProductResponseDTO> save(@RequestBody @Valid ProductDTO dto){
        var product = service.save(dto);
        return ResponseEntity.status(HttpStatus.CREATED).body(product);
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id){
+            service.delete(id);
+            return ResponseEntity.noContent().build();
     }
 }

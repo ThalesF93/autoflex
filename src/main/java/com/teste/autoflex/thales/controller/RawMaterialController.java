@@ -1,6 +1,7 @@
 package com.teste.autoflex.thales.controller;
 
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
+import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import com.teste.autoflex.thales.service.RawMaterialService;
@@ -24,7 +25,7 @@ public class RawMaterialController {
     private RawMaterialService service;
 
     @PostMapping("/create")
-    public ResponseEntity<RawMaterial> create(@RequestBody @Valid RawMaterialDTO dto){
+    public ResponseEntity<RawMaterialResponseDTO> create(@RequestBody @Valid RawMaterialDTO dto){
         var material = service.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(material);
     }
@@ -32,7 +33,7 @@ public class RawMaterialController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable UUID id){
             service.delete(id);
-            return ResponseEntity.ok("Material deleted Successfully!");
+            return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/update")
