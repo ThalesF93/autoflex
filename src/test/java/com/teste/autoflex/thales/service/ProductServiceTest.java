@@ -5,6 +5,7 @@ import com.teste.autoflex.thales.dto.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
 import com.teste.autoflex.thales.exceptions.DuplicatedRegisterException;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
+import com.teste.autoflex.thales.exceptions.ProductNotFoundException;
 import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.ProductRepository;
@@ -27,8 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -85,5 +85,31 @@ class ProductServiceTest {
 
         Assertions.assertThatExceptionOfType(MaterialNotFoundException.class)
                 .isThrownBy(()-> service.save(dto)).withMessage("Material not Found");
+    }
+
+    @Test
+    @DisplayName("Must delete product successfully")
+    void mustDeleteProduct(){
+        UUID uuid = UUID.randomUUID();
+        Product product = new Product();
+
+        when(productRepository.findById(uuid)).thenReturn(Optional.of(product));
+        doNothing().when(productRepository).delete(product);
+
+        service.delete(uuid);
+        verify(productRepository).delete(product);
+    }
+
+    @Test
+    @DisplayName("Should throw ProductNotFoundException when deleting non-existent product")
+    void shouldThrowExceptionWhenProductNotFound() {
+        UUID uuid = UUID.randomUUID();
+
+        when(productRepository.findById(uuid)).thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(ProductNotFoundException.class)
+                .isThrownBy(()-> service.delete(uuid)).withMessage("Product Not found");
+
+        verify(productRepository, never()).delete(any(Product.class));
     }
 }

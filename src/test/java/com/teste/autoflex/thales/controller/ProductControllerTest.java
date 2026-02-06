@@ -91,4 +91,22 @@ class ProductControllerTest {
 
     }
 
+    @Test
+    @DisplayName("Deleting Product ")
+    void shouldDeleteProduct() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        final String DELETE_ENDPOINT = "/product/{id}";
+
+        Mockito.doNothing().when(service).delete(id);
+
+        mvc.perform(MockMvcRequestBuilders
+                        .delete(DELETE_ENDPOINT, id))
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(service).delete(id);
+    }
+
+
+
 }

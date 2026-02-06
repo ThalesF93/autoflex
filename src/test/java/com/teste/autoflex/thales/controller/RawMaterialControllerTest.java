@@ -80,7 +80,7 @@ class RawMaterialControllerTest {
 
         mvc.perform(MockMvcRequestBuilders
                         .delete(DELETE_ENDPOINT, uuid))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         Mockito.verify(service).delete(uuid);
 
