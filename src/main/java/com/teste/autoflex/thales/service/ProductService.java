@@ -64,7 +64,6 @@ public class ProductService {
                         .map(c ->
                                 new IngredientResponseDTO(c.getRawMaterial().getName(), c.getRequiredQuantity()))
                         .toList()
-
         );
     }
 
@@ -73,5 +72,9 @@ public class ProductService {
       var product =  productRepository.findById(id)
               .orElseThrow(()-> new ProductNotFoundException("Product Not found"));
        productRepository.delete(product);
+    }
+
+    public List<Product> listAll(){
+        return productRepository.findAllByOrderByNameAsc();
     }
 }
