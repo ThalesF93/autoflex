@@ -108,12 +108,12 @@ class RawMaterialServiceTest {
     
         RawMaterial material1 = new RawMaterial();
         material1.setId(UUID.randomUUID());
-        material1.setName("example material 1");
+        material1.setName("Arroz");
         material1.setStockQuantity(100D);
     
         RawMaterial material2 = new RawMaterial();
         material2.setId(UUID.randomUUID());
-        material2.setName("example material 2");
+        material2.setName("Feijao");
         material2.setStockQuantity(200D);
     
         List<RawMaterial> expectedMaterials = List.of(material1, material2);

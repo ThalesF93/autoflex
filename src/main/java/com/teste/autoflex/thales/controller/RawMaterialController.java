@@ -3,7 +3,6 @@ package com.teste.autoflex.thales.controller;
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
 import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
-import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import com.teste.autoflex.thales.service.RawMaterialService;
 import jakarta.validation.Valid;
 import lombok.Data;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @Data

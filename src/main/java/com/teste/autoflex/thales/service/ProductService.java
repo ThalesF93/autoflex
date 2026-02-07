@@ -13,6 +13,8 @@ import com.teste.autoflex.thales.repository.ProductRepository;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,4 +79,33 @@ public class ProductService {
     public List<Product> listAll(){
         return productRepository.findAllByOrderByNameAsc();
     }
+
+    public List<Product> search(String name){
+        Product product = new Product();
+        product.setName(name);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
+                .withIgnoreCase()
+                .withIgnoreNullValues();
+
+        Example<Product> example = Example.of(product, matcher);
+
+        return productRepository.findAll(example);
+    }
+
+    public static List<ProductResponseDTO> convertListToDTO(List<Product> list) {
+        return list.stream()
+                .map(p -> new ProductResponseDTO(
+                        p.getId(),
+                        p.getName(),
+                        p.getPrice(),
+                        p.getCompositions().stream()
+                                .map(m -> new IngredientResponseDTO(
+                                        m.getRawMaterial().getName(),
+                                        m.getRequiredQuantity()))
+                                .toList()))
+                .toList();
+    }
+
 }
