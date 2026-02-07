@@ -3,6 +3,8 @@ package com.teste.autoflex.thales.service;
 import com.teste.autoflex.thales.dto.ProductDTO;
 import com.teste.autoflex.thales.dto.response.IngredientResponseDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
+import com.teste.autoflex.thales.dto.update.IngredientUpdateDTO;
+import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.exceptions.DuplicatedRegisterException;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
 import com.teste.autoflex.thales.exceptions.ProductNotFoundException;
@@ -92,6 +94,47 @@ public class ProductService {
         Example<Product> example = Example.of(product, matcher);
 
         return productRepository.findAll(example);
+    }
+
+    @Transactional
+    public ProductUpdateDTO update(UUID id, ProductUpdateDTO dto){
+
+    Product product = productRepository.findById(id).orElseThrow(()-> new ProductNotFoundException("Product not Found"));
+
+    if (dto.name() != null && !dto.name().isBlank()){
+        product.setName(dto.name());
+    }
+
+    if (dto.price() != null){
+        product.setPrice(dto.price());
+    }
+
+    if (dto.ingredients() != null){
+        product.getCompositions().clear();
+
+        dto.ingredients().forEach(ingredientDTO -> {
+            RawMaterial rawMaterial =
+                    rawMaterialRepository.findById(ingredientDTO.rawMaterialId())
+                            .orElseThrow(()-> new MaterialNotFoundException("Material not Found"));
+
+            ProductComposition composition = new ProductComposition();
+            composition.setProduct(product);
+            composition.setRawMaterial(rawMaterial);
+            composition.setRequiredQuantity(ingredientDTO.quantity());
+
+            product.getCompositions().add(composition);
+        });
+    }
+        Product updatedProduct = productRepository.save(product);
+
+        var ingredientsResponse = updatedProduct.getCompositions().stream()
+                .map(ing -> new IngredientUpdateDTO(
+                        ing.getRawMaterial().getId(),
+                        ing.getRawMaterial().getName(),
+                        ing.getRequiredQuantity()))
+                .toList();
+
+        return new ProductUpdateDTO(updatedProduct.getName(), updatedProduct.getPrice(), ingredientsResponse);
     }
 
     public static List<ProductResponseDTO> convertListToDTO(List<Product> list) {

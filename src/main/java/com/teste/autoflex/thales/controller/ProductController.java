@@ -2,10 +2,12 @@ package com.teste.autoflex.thales.controller;
 
 import com.teste.autoflex.thales.dto.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
+import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,7 @@ import java.util.UUID;
 import static com.teste.autoflex.thales.service.ProductService.convertListToDTO;
 
 @RestController
-@Data
+@RequiredArgsConstructor
 @RequestMapping("/product")
 public class ProductController {
 
@@ -50,5 +52,9 @@ public class ProductController {
         return ResponseEntity.ok(listDTO);
     }
 
-
+    @PutMapping("/update")
+    public ResponseEntity<ProductUpdateDTO> update(@RequestParam UUID id, @RequestBody @Valid ProductUpdateDTO dto){
+        var updated = service.update(id, dto);
+        return ResponseEntity.ok(updated);
+    }
 }
