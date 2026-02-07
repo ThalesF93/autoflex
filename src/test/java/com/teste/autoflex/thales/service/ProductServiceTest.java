@@ -18,12 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Example;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,8 +47,8 @@ class ProductServiceTest {
     @Test
     @DisplayName("Must create a product with existing raw material")
     void mustCreateProduct(){
-       UUID materialId = UUID.randomUUID();
-       RawMaterial material = new RawMaterial();
+        UUID materialId = UUID.randomUUID();
+        RawMaterial material = new RawMaterial();
 
         IngredientDTO ingredientDTO = new IngredientDTO(materialId, 2.0);
         ProductDTO dto = new ProductDTO(null, "Cerveja", new BigDecimal("15.00"), List.of(ingredientDTO));
@@ -111,5 +113,54 @@ class ProductServiceTest {
                 .isThrownBy(()-> service.delete(uuid)).withMessage("Product Not found");
 
         verify(productRepository, never()).delete(any(Product.class));
+    }
+
+    @Test
+    @DisplayName("Must return ordered list of all products")
+    void mustReturnListOfAllProductsByAsc(){
+
+        Product p1 = new Product();
+        p1.setName("Chocolate");
+
+        Product p2 = new Product();
+        p2.setName("Abacaxi");
+
+        when(productRepository.findAllByOrderByNameAsc()).thenReturn(List.of(p1, p2));
+
+        var result = service.listAll();
+
+        Assertions.assertThat(result)
+                .isNotNull()
+                .hasSize(2)
+                .extracting("name")
+                .containsExactly("Chocolate", "Abacaxi");
+
+        verify(productRepository, times(1)).findAllByOrderByNameAsc();
+
+    }
+
+    @Test
+    @DisplayName("Must return search by example")
+    void mustReturnSearchByExample(){
+        String searchName = "example";
+
+        Product product = new  Product();
+        product.setId(UUID.randomUUID());
+        product.setName("Test");
+
+        Product product1 = new  Product();
+        product1.setId(UUID.randomUUID());
+        product1.setName("Test1");
+
+        List< Product> expectedMaterials = List.of(product, product1);
+
+        when(productRepository.findAll(any(Example.class))).thenReturn(expectedMaterials);
+
+        List<Product> result = service.search(searchName);
+
+        verify(productRepository).findAll(any(Example.class));
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result).containsExactlyInAnyOrder(product, product1);
     }
 }

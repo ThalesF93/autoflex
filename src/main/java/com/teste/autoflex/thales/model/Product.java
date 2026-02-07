@@ -25,6 +25,5 @@ public class Product {
     private BigDecimal price;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
     private List<ProductComposition> compositions = new ArrayList<>();
 }

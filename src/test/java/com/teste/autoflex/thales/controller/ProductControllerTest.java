@@ -107,6 +107,50 @@ class ProductControllerTest {
         Mockito.verify(service).delete(id);
     }
 
+    @Test
+    @DisplayName("Testing Get method and list all products")
+    void shouldListAllProducts() throws Exception {
 
+        final String GET_ENDPOINT = "/product/listAll";
 
+        Product product = new  Product();
+        product.setId(UUID.randomUUID());
+        product.setName("Pastel");
+
+        Product product1 = new  Product();
+        product1.setId(UUID.randomUUID());
+        product1.setName("Carne");
+
+        Mockito.when(service.listAll()).thenReturn(List.of(product, product1));
+
+        mvc.perform(MockMvcRequestBuilders
+                .get(GET_ENDPOINT))
+                .andExpect(status().isOk());
+
+        Mockito.verify(service).listAll();
+    }
+
+    @Test
+    @DisplayName("Testing Get method and list products by name ")
+    void shouldSearchByExample() throws Exception {
+
+        final String GET_ENDPOINT = "/product/search";
+
+        Product product = new  Product();
+        product.setId(UUID.randomUUID());
+        product.setName("frango");
+        product.setPrice(new BigDecimal("50.0"));
+
+        Mockito.when(service.search(product.getName())).thenReturn(List.of(product));
+
+        mvc.perform(MockMvcRequestBuilders
+                        .get(GET_ENDPOINT)
+                        .param("name", product.getName()))
+                .andExpect(jsonPath("$[0].name").value(product.getName()))
+                .andExpect(jsonPath("$[0].price").value(product.getPrice()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(service)
+                .search(product.getName());
+    }
 }
