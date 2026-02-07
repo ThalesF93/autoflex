@@ -2,6 +2,7 @@ package com.teste.autoflex.thales.service;
 
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
+import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import org.assertj.core.api.Assertions;
@@ -128,4 +129,27 @@ class RawMaterialServiceTest {
         assertThat(result).containsExactlyInAnyOrder(material1, material2);
     }
 
+    @Test
+    @DisplayName("Must return ordered list of all products")
+    void mustReturnListOfAllProductsByAsc(){
+
+        RawMaterial p1 = new RawMaterial();
+        p1.setName("Leite");
+
+        RawMaterial p2 = new RawMaterial();
+        p2.setName("milho");
+
+        when(repository.findAllByOrderByNameAsc()).thenReturn(List.of(p1, p2));
+
+        var result = service.listAll();
+
+        Assertions.assertThat(result)
+                .isNotNull()
+                .hasSize(2)
+                .extracting("name")
+                .containsExactly("Leite", "milho");
+
+        verify(repository, times(1)).findAllByOrderByNameAsc();
+
+    }
 }

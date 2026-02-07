@@ -3,6 +3,7 @@ package com.teste.autoflex.thales.service;
 import com.teste.autoflex.thales.dto.RawMaterialDTO;
 import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
+import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import lombok.Data;
@@ -51,6 +52,10 @@ public class RawMaterialService {
        return repository.save(material);
     }
 
+    public List<RawMaterial> listAll(){
+        return repository.findAllByOrderByNameAsc();
+    }
+
     public List<RawMaterial>  search(String name){
         RawMaterial entity = new  RawMaterial();
         entity.setName(name);
@@ -63,5 +68,9 @@ public class RawMaterialService {
 
         Example<RawMaterial> materials = Example.of(entity, matcher);
         return repository.findAll(materials);
+    }
+
+    public static List<RawMaterialDTO> toListDTO(List<RawMaterial> products) {
+        return products.stream().map(rm -> new RawMaterialDTO(rm.getId(), rm.getName(), rm.getStockQuantity())).toList();
     }
 }
