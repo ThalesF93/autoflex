@@ -84,7 +84,7 @@ class RawMaterialServiceTest {
         rawMaterial.setName("test");
         rawMaterial.setStockQuantity(100D);
 
-        when(repository.findByName(rawMaterial.getName())).thenReturn(rawMaterial);
+        when(repository.findByName(rawMaterial.getName())).thenReturn(Optional.of(rawMaterial) );
         when(repository.save(Mockito.any(RawMaterial.class))).thenReturn(rawMaterial);
 
         service.update(rawMaterial.getName(), rawMaterial.getStockQuantity());

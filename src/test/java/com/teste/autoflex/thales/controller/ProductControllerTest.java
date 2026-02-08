@@ -3,6 +3,7 @@ package com.teste.autoflex.thales.controller;
 import com.teste.autoflex.thales.dto.IngredientDTO;
 import com.teste.autoflex.thales.dto.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
+import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.repository.ProductRepository;
 import com.teste.autoflex.thales.service.ProductService;
@@ -152,5 +153,27 @@ class ProductControllerTest {
 
         Mockito.verify(service)
                 .search(product.getName());
+    }
+
+    @Test
+    @DisplayName("Must update the product")
+    void shouldUpdateProductSuccessfully() throws Exception{
+        final String PUT_ENDPOINT = "/product/update";
+
+        UUID id = UUID.randomUUID();
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO("test", new BigDecimal("50.0"), List.of());
+
+        Mockito.when(service.update(id, updateDTO)).thenReturn(updateDTO);
+
+        mvc.perform(MockMvcRequestBuilders
+                .put(PUT_ENDPOINT)
+                .content(objectMapper.writeValueAsBytes(updateDTO))
+                .accept(APPLICATION_JSON)
+                .contentType(APPLICATION_JSON)
+                .param("id", id.toString()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(service).update(id, updateDTO);
+
     }
 }

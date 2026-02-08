@@ -43,11 +43,10 @@ public class RawMaterialService {
 
     @Transactional
     public RawMaterial update(String name, Double newQuantity){
-       RawMaterial material = repository.findByName(name);
-       if (material == null){
-           throw new MaterialNotFoundException("Material not found");
-       }
-       material.setStockQuantity(newQuantity);
+       RawMaterial material = repository.findByName(name)
+               .orElseThrow(() -> new MaterialNotFoundException("Material not found"));
+
+       material.setStockQuantity(material.getStockQuantity() + newQuantity);
 
        return repository.save(material);
     }
