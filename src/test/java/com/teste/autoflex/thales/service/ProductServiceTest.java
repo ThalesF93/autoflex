@@ -3,6 +3,7 @@ package com.teste.autoflex.thales.service;
 import com.teste.autoflex.thales.dto.IngredientDTO;
 import com.teste.autoflex.thales.dto.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
+import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.exceptions.DuplicatedRegisterException;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
 import com.teste.autoflex.thales.exceptions.ProductNotFoundException;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -162,5 +164,43 @@ class ProductServiceTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(2);
         assertThat(result).containsExactlyInAnyOrder(product, product1);
+    }
+
+    @Test
+    @DisplayName("Must update any aspect of the product.")
+    void mustUpdateProduct(){
+
+        UUID productId = UUID.randomUUID();
+
+        Product product = new Product();
+        product.setName("test");
+        product.setPrice(new BigDecimal("100.00"));
+        product.setCompositions(new ArrayList<>());
+
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO("Updated Name", new BigDecimal("50.0"), List.of());
+
+        when(productRepository.findById(productId)).thenReturn(Optional.of(product));
+        when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+        var result = service.update(productId, updateDTO);
+
+        Assertions.assertThat(result.name()).isEqualTo("Updated Name");
+        Assertions.assertThat(result.price()).isEqualTo(new BigDecimal("50.0"));
+
+        verify(productRepository).findById(productId);
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    @DisplayName("Must Throw Exceptio when ID not found")
+    void mustThrowExceptionWhenUpdateNoneExistingProduct(){
+        UUID id = UUID.randomUUID();
+
+        ProductUpdateDTO updateDTO = new ProductUpdateDTO("test", new BigDecimal("50.0"), List.of());
+
+        when(productRepository.findById(id)).thenReturn(Optional.empty());
+
+        Assertions.assertThatExceptionOfType(ProductNotFoundException.class)
+                .isThrownBy(()-> service.update(id, updateDTO)).withMessage("Product not Found");
     }
 }
