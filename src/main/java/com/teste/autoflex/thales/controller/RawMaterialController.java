@@ -1,7 +1,6 @@
 package com.teste.autoflex.thales.controller;
 
-import com.teste.autoflex.thales.dto.RawMaterialDTO;
-import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.RawMaterialDTO;
 import com.teste.autoflex.thales.dto.response.RawMaterialResponseDTO;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.service.RawMaterialService;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import static com.teste.autoflex.thales.service.ProductService.convertListToDTO;
 import static com.teste.autoflex.thales.service.RawMaterialService.toListDTO;
 
 @RestController

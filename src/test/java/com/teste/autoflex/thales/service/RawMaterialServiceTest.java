@@ -1,8 +1,7 @@
 package com.teste.autoflex.thales.service;
 
-import com.teste.autoflex.thales.dto.RawMaterialDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.RawMaterialDTO;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
-import com.teste.autoflex.thales.model.Product;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
 import org.assertj.core.api.Assertions;

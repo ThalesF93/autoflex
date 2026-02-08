@@ -1,13 +1,15 @@
 package com.teste.autoflex.thales.service;
 
-import com.teste.autoflex.thales.dto.IngredientDTO;
-import com.teste.autoflex.thales.dto.ProductDTO;
+import com.teste.autoflex.thales.dto.suggestionDTO.ProductionReportDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.IngredientDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
 import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.exceptions.DuplicatedRegisterException;
 import com.teste.autoflex.thales.exceptions.MaterialNotFoundException;
 import com.teste.autoflex.thales.exceptions.ProductNotFoundException;
 import com.teste.autoflex.thales.model.Product;
+import com.teste.autoflex.thales.model.ProductComposition;
 import com.teste.autoflex.thales.model.RawMaterial;
 import com.teste.autoflex.thales.repository.ProductRepository;
 import com.teste.autoflex.thales.repository.RawMaterialRepository;
@@ -202,5 +204,42 @@ class ProductServiceTest {
 
         Assertions.assertThatExceptionOfType(ProductNotFoundException.class)
                 .isThrownBy(()-> service.update(id, updateDTO)).withMessage("Product not Found");
+    }
+
+    @Test
+    @DisplayName("Must calculate suggestions prioritizing higher price")
+    void shouldCalculateSuggestionsPrioritizingPrice() {
+        RawMaterial orange = new RawMaterial();
+        orange.setId(UUID.randomUUID());
+        orange.setName("Orange");
+        orange.setStockQuantity(10.0);
+
+        Product premium = new Product();
+        premium.setName("Premium Juice");
+        premium.setPrice(new BigDecimal("50.00"));
+
+        ProductComposition composition1 = new ProductComposition();
+        composition1.setRawMaterial(orange);
+        composition1.setRequiredQuantity(5.0);
+        premium.setCompositions(List.of(composition1));
+
+        Product simple = new Product();
+        simple.setName("Simple Juice");
+        simple.setPrice(new BigDecimal("10.00"));
+
+        ProductComposition composition2 = new ProductComposition();
+        composition2.setRawMaterial(orange);
+        composition2.setRequiredQuantity(2.0);
+        simple.setCompositions(List.of(composition2));
+
+        when(productRepository.findAll()).thenReturn(new ArrayList<>(List.of(simple, premium)));
+        when(rawMaterialRepository.findAll()).thenReturn(List.of(orange));
+
+        ProductionReportDTO report = service.getProductionSuggestions();
+
+        Assertions.assertThat(report.totalEstimatedValue()).isEqualByComparingTo("100.00");
+        Assertions.assertThat(report.suggestions()).hasSize(1);
+        Assertions.assertThat(report.suggestions().get(0).productName()).isEqualTo("Premium Juice");
+        Assertions.assertThat(report.suggestions().get(0).quantity()).isEqualTo(2);
     }
 }
