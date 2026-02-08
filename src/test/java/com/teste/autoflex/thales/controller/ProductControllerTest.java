@@ -1,7 +1,9 @@
 package com.teste.autoflex.thales.controller;
 
-import com.teste.autoflex.thales.dto.IngredientDTO;
-import com.teste.autoflex.thales.dto.ProductDTO;
+import com.teste.autoflex.thales.dto.suggestionDTO.ProductionReportDTO;
+import com.teste.autoflex.thales.dto.suggestionDTO.ProductionSuggestionDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.IngredientDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.ProductDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
 import com.teste.autoflex.thales.dto.update.ProductUpdateDTO;
 import com.teste.autoflex.thales.model.Product;
@@ -12,13 +14,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
-import java.rmi.server.UID;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -175,5 +177,28 @@ class ProductControllerTest {
 
         Mockito.verify(service).update(id, updateDTO);
 
+    }
+
+    @Test
+    @DisplayName("Must prioritize higher value products in suggestions")
+    void shouldReturnPrioritizedSuggestions() throws Exception {
+
+        ProductionSuggestionDTO suggestion = new ProductionSuggestionDTO(
+                "test", 2D, new BigDecimal("40.00"));
+
+        ProductionReportDTO report = new ProductionReportDTO(
+                List.of(suggestion), new BigDecimal("40.00"));
+
+        Mockito.when(service.getProductionSuggestions()).thenReturn(report);
+
+        mvc.perform(MockMvcRequestBuilders
+                        .get("/product/production")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalEstimatedValue").value(40.00))
+                .andExpect(jsonPath("$.suggestions[0].productName").value("test"))
+                .andExpect(jsonPath("$.suggestions[0].quantity").value(2));
+
+        Mockito.verify(service).getProductionSuggestions();
     }
 }

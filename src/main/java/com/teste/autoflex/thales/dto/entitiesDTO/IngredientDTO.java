@@ -1,4 +1,4 @@
-package com.teste.autoflex.thales.dto;
+package com.teste.autoflex.thales.dto.entitiesDTO;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

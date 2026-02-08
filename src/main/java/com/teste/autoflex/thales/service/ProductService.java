@@ -1,6 +1,8 @@
 package com.teste.autoflex.thales.service;
 
-import com.teste.autoflex.thales.dto.ProductDTO;
+import com.teste.autoflex.thales.dto.suggestionDTO.ProductionReportDTO;
+import com.teste.autoflex.thales.dto.suggestionDTO.ProductionSuggestionDTO;
+import com.teste.autoflex.thales.dto.entitiesDTO.ProductDTO;
 import com.teste.autoflex.thales.dto.response.IngredientResponseDTO;
 import com.teste.autoflex.thales.dto.response.ProductResponseDTO;
 import com.teste.autoflex.thales.dto.update.IngredientUpdateDTO;
@@ -20,8 +22,8 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.*;
 
 @Service
 @Data
@@ -136,6 +138,60 @@ public class ProductService {
 
         return new ProductUpdateDTO(updatedProduct.getName(), updatedProduct.getPrice(), ingredientsResponse);
     }
+
+
+    public ProductionReportDTO getProductionSuggestions() {
+        List<Product> products = productRepository.findAll();
+        List<RawMaterial> materials = rawMaterialRepository.findAll();
+
+        products.sort((p1, p2) -> p2.getPrice().compareTo(p1.getPrice()));
+
+        Map<UUID, Double> tempStock = new HashMap<>();
+        for (RawMaterial m : materials) {
+            tempStock.put(m.getId(), m.getStockQuantity());
+        }
+
+        List<ProductionSuggestionDTO> suggestions = new ArrayList<>();
+        BigDecimal grandTotalValue = BigDecimal.ZERO;
+
+        for (Product product : products) {
+            double possibleQuantity = 999999;
+
+            for (ProductComposition composition : product.getCompositions()) {
+                double available = tempStock.get(composition.getRawMaterial().getId());
+                double required = composition.getRequiredQuantity();
+
+                double canMake = (available / required);
+
+                if (canMake < possibleQuantity) {
+                    possibleQuantity = canMake;
+                }
+            }
+
+            if (possibleQuantity > 0) {
+                for (ProductComposition composition : product.getCompositions()) {
+                    UUID rawMaterialId = composition.getRawMaterial().getId();
+                    double spent = possibleQuantity * composition.getRequiredQuantity();
+
+                    double remaining = tempStock.get(rawMaterialId) - spent;
+                    tempStock.put(rawMaterialId, remaining);
+                }
+
+                BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(possibleQuantity));
+                grandTotalValue = grandTotalValue.add(subtotal);
+
+                suggestions.add(new ProductionSuggestionDTO(
+                        product.getName(),
+                        possibleQuantity,
+                        subtotal
+                ));
+            }
+        }
+
+        return new ProductionReportDTO(suggestions, grandTotalValue);
+
+    }
+
 
     public static List<ProductResponseDTO> convertListToDTO(List<Product> list) {
         return list.stream()
